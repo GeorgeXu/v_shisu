@@ -65,3 +65,32 @@ function curl_invoke($url, $method, $data, $header = null, &$http_code = 0, &$er
         return null;
     }
 }
+
+/**
+ * str_replace 只替换一次
+ * @param string $needle
+ * @param string $replace
+ * @param string $haystack
+ * @return string
+ */
+function str_replace_once($needle, $replace, $haystack) {
+    $pos = strpos($haystack, $needle);
+    if ($pos === false) {
+        return $haystack;
+    }
+    return substr_replace($haystack, $replace, $pos, strlen($needle));
+}
+
+function get_dir_path($fullpath) {
+    return substr($fullpath, 0, strrpos($fullpath, '/'));
+}
+
+//获取文件扩展名
+function get_file_ext($filename) {
+    $pos = strrpos($filename, ".");
+    if ($pos !== false) {
+        return strtolower(substr($filename, $pos + 1));
+    } else {
+        return '';
+    }
+}
