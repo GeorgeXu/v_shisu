@@ -1,0 +1,254 @@
+
+/*警告*/
+
+.alert h4 {
+    font-weight: bold;
+    font-size: 14px;
+    white-space: nowrap;
+    padding-right: 16px;
+    text-overflow: ellipsis;
+    -moz-text-overflow: ellipsis;
+    -webkit-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+
+
+
+.alert_success {
+    -webkit-box-shadow: 0 0 6px rgba(132, 199, 119, 0.8);
+    -moz-box-shadow: 0 0 6px rgba(132, 199, 119, 0.8);
+    box-shadow: 0 0 6px rgba(132, 199, 119, 0.8);
+    background-color: #F9FCF8;
+    border: 1px solid #84C777;
+}
+
+.alert_success,
+.alert_success .close {
+    text-shadow: 0 0 1px rgba(132, 199, 119, 0.25);
+    color: #84C777;
+}
+
+.alert_error {
+    -webkit-box-shadow: 0 0 6px rgba(218,73,73, 0.8);
+    -moz-box-shadow: 0 0 6px rgba(218,73,73, 0.8);
+    box-shadow: 0 0 6px rgba(218,73,73, 0.8);
+    background-color: #FEF8F6;
+    border: 1px solid #DA4949;
+}
+
+.alert_error,
+.alert_error .close {
+    text-shadow: 0 0 1px rgba(218,73,73, 0.25);
+    color: #DA4949;
+}
+
+.alert_info {
+    -webkit-box-shadow: 0 0 6px rgba(107,170,211, 0.8);
+    -moz-box-shadow: 0 0 6px rgba(107,170,211, 0.8);
+    box-shadow: 0 0 6px rgba(107,170,211, 0.8);
+    background-color: #F8FBFD;
+    border: 1px solid #6BAAD3;
+}
+
+.alert_info,
+.alert_info .close {
+    text-shadow: 0 0 1px rgba(107,170,211, 0.25);
+    color: #6BAAD3;
+}
+
+/*菊花*/
+.loading {
+    margin:auto;
+}
+
+.loading span{
+    line-height: 32px;
+    margin-left: 12px;
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.loading img{
+    vertical-align: middle;
+}
+
+.loading_wrp {
+    background-color: #FFF;
+    display: block;
+    height:  100%;
+
+    opacity: 0.5;
+    filter: alpha(opacity=50);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10000;
+}
+
+.loading_wrp .x16 span{
+    line-height: 16px;
+    font-size: 12px;
+    margin-left: 6px;
+}
+.loading_wrp .x32 img{
+    width: 32px;
+    height: 32px;
+}
+.empty{
+    text-align: center;
+    padding-top: 30px;
+    color:#ccc;
+}
+
+.wrapper{
+    width:1000px;
+    margin: 0 auto;
+}
+.sidebar{
+    width:200px;
+    border-right:1px solid #ccc;
+    position: absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    _height:100%;
+}
+
+.content{
+    width:800px;
+    position: absolute;
+    left:200px;
+    top:0;
+    bottom:0;
+    _height:100%;
+}
+.content .file_list{
+    position: absolute;
+    width: 100%;
+    top:47px;
+    bottom:0;
+    overflow: auto;
+    _height:expression((document.documentElement.clientHeight-60-20-47)+"px")
+}
+.wrapper .main{
+    background: #fff;
+    border:1px solid #ccc;
+    border-radius: 5px;
+    position: absolute;
+    top:60px;
+    bottom:20px;
+    width:1000px;
+    _height:expression((document.documentElement.clientHeight-60-20)+"px")
+}
+.header{
+    height: 40px;
+    line-height: 40px;
+    padding: 10px 0;
+}
+.header h1{
+    font-size: 20px;
+    margin-top: 10px;
+}
+.toolbar .btn{
+    margin:0 5px;
+}
+.content .content_header{
+    border-bottom: 1px solid #ccc;
+    padding:10px;
+}
+
+.view_as_thumb .file_item{
+    width:110px;
+    float: left;
+    display: inline;
+    margin:10px 0 10px 40px;
+    border:0;
+}
+.view_as_thumb .file_item .thumb_wrapper{
+    height: 90px;
+    width:110px;
+    text-align: center;
+    display: table-cell;
+    vertical-align:middle;
+    /* 针对IE的Hack */
+    *display: block;
+    *font-size: 78px;/*约为高度的0.873，200*0.873 约为175*/
+    *font-family:Arial;/*防止非utf-8引起的hack失效问题，如gbk编码*/
+}
+.view_as_thumb .file_item .thumb_wrapper img{
+    vertical-align: middle;
+}
+.view_as_thumb .file_item .filename{
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    -webkit-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    -moz-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    margin:0;
+}
+.view_as_thumb .file_item .filename,
+.view_as_thumb .file_item .filename a{
+    color:#434343;
+    font-size: 14px;
+    font-family: "hiragino sans gb","Helvetica Neue","Helvetica","Arial","Microsoft Yahei","宋体", "simsun","sans-serif";
+}
+.view_as_thumb .file_item .filename a.name:hover{
+    text-decoration: underline;
+}
+.view_as_thumb .file_item .btn_wrp{
+    float: none;
+    display: block;
+    margin: 0;
+    text-align: center;
+    width: auto;
+
+}
+.view_as_thumb .file_item_edit .filename{
+    margin: -10px 0 0 0;
+    _margin-top:-12px;
+}
+.view_as_thumb .file_item_edit .input_text_radius{
+    width:95px;
+}
+.view_as_thumb .file_item_edit .edit_btns{
+    margin: 5px 0 0 0;
+}
+.view_as_thumb .file_item_edit .edit_btns .btn{
+  margin-left: 2px;
+    padding: 3px 10px;
+}
+
+#uploadVideoModal .select_file_wrapper{
+    position: relative;
+    width: 102px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    padding: 0;
+}
+
+#uploadVideoModal .select_file_wrapper #select_video_file{
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    font-size: 23px;
+    direction: ltr;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+    z-index: 99;
+}
+#uploadVideoModal .alert{
+    margin-top: 10px;
+}
+#uploadVideoModal .modal-dialog{
+    width: 600px;
+}

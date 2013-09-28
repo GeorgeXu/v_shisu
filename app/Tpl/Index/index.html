@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link type="text/css" rel="stylesheet" href="/Common/js/lib/bootstrap/css/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="/Common/css/base.css" />
+    <link type="text/css" rel="stylesheet" href="/Common/js/lib/zTree/css/zTreeStyle/zTreeStyle.css" />
+    <link type="text/css" rel="stylesheet" href="/Common/css/style.css" />
+    <script type="text/javascript" src="/Common/js/util.js"></script>
+    <script type="text/javascript" src="/Common/js/lib/json2.js"></script>
+    <script type="text/javascript" src="/Common/js/lib/jquery.js"></script>
+    <script src="https://www.gokuai.com/index/gkc " type="text/javascript"></script>
+    <script type="text/javascript" src="/Common/js/lib/jquery-ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="/Common/js/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/Common/js/lib/zTree/js/jquery.ztree.core-3.5.min.js"></script>
+    <script type="text/javascript" src="/Common/js/component/alert.js"></script>
+    <script type="text/javascript" src="/Common/js/component/loader.js"></script>
+    <script type="text/javascript" src="/Common/js/lib/jquery.tmpl.min.js"></script>
+    <script type="text/javascript" src="/Common/js/lib/jquery-fileupload/jquery.iframe-transport.js"></script>
+    <script type="text/javascript" src="/Common/js/lib/jquery-fileupload/jquery.fileupload.js"></script>
+    <script type="text/javascript" src="/Common/js/script.js"></script>
+
+    <script type="text/javascript">
+        var PAGE_CONFIG = {
+            xmlData: $.parseJSON('{$xml_data}')
+        }
+        $(function(){
+            gkHomeWorkDemo.init();
+        })
+    </script>
+</head>
+<body style="background-color:{$background_color}">
+    <div class="wrapper">
+        <div class="header">
+            <div class="c_f header_left">
+                <?php if($logo_url): ?>
+                <img src="{$logo_url}" class="f_l" alt="" />
+                <?php endif; ?>
+                <h1 class="f_l">{$page_name}</h1>
+            </div>
+        </div>
+        <div class="main c_f">
+            <div class="sidebar">
+                <div class="ztree node_list"></div>
+            </div>
+            <div class='content'>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 上传视频 Modal -->
+    <div class="modal fade" id="uploadVideoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">请填写视频信息</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label">视频文件</label>
+                            <div class="col-sm-10">
+                                <div>
+                                    <span class="btn btn-default select_file_wrapper">
+                                    <span>从本地选择</span>
+                                    <input type="file" name="file" id="select_video_file" />
+                                </span>
+                                    <button class="btn btn-default select_from_gokuai">从够快中选择</button>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="video_name" class="col-sm-2 control-label">视频名称</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="video_name" placeholder="" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="video_name" class="col-sm-2 control-label">视频简介</label>
+                            <div class="col-sm-10">
+                                <textarea name="video_introduction" class="form-control" id="video_introduction" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="video_uploader" class="col-sm-2 control-label">上传者</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="video_uploader" placeholder="" value="{$member['name']}" />
+                            </div>
+                        </div>
+                        <input type="hidden" value="" id="video_tmp_path"/>
+                        <input type="hidden" value="" id="video_code"/>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary ok" disabled>确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script id="contentTmpl" type="text/x-jquery-tmpl">
+        <div class="c_f_after content_header">
+            <div class="f_l bread">
+                {{each(i,bread) breads}}
+                {{if i!=0}}
+                <span>&gt;</span>
+                {{/if}}
+                {{if bread.href}}
+                <a href="${bread.href}">${bread.name}</a>
+                {{else}}
+                <span>${bread.name}</span>
+                {{/if}}
+                {{/each}}
+            </div>
+            <div class="f_r toolbar">
+                {{if gkHomeWorkDemo.checkAuth('upload',access)}}
+                <button class="btn blue_btn btn-primary cmd_show_upload_video" data-toggle="modal" data-target="#uploadVideoModal">上传视频</button>
+                {{/if}}
+            </div>
+        </div>
+        <div class="view_as_thumb file_list">
+            {{if files&&files.length}}
+            {{each(i,file) files}}
+            <include file="fileItemTmpl" />
+            {{/each}}
+            {{else}}
+            <div class="empty">该文件夹为空</div>
+            {{/if}}
+        </div>
+    </script>
+
+    <script id="newFileItemTemplate" type="text/x-jquery-tmpl">
+        <div class="file_item new_file_item file_item_edit">
+            <div class="thumb_wrapper">
+                <img src="${imgpath}" alt="" />
+            </div>
+            <div class="filename">
+                <input class="input_text_radius input_filename" type="text" value="${filename}" x-webkit-speech="" />
+            </div>
+            <div class="edit_btns"><button class="btn blue_btn btn-primary">确定</button><button class="btn btn-default">取消</button></div>
+        </div>
+    </script>
+    <script id="fileItemTmpl" type="text/x-jquery-tmpl">
+        <include file="fileItemTmpl" />
+        </script>
+    <script id="uploadFileListTmpl" type="text/x-jquery-tmpl">
+        <ul class="upload_list">
+            {{each(i,file) files}}
+            <li>
+                <div class="filename">${file.name}</div>
+                <div class="progress" style="display:none">
+                    <div class="progress-bar" role="progressbar" style="width:0;">
+
+                    </div>
+                </div>
+            </li>
+            {{/each}}
+        </ul>
+    </script>
+</body>
+</html>
