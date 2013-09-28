@@ -47,8 +47,8 @@ class IndexAction extends Action
     private function addTmplNode(){
         $nodes = $this->gkWidget->getNodes();
         $new_node = [
-            'name'=>$this->member['id'],
-            'path'=>$this->member['id'],
+            'name'=>$this->member['name'],
+            'path'=>$this->member['name'],
             'access'=>'upload|download|view'
         ];
         foreach($nodes as $v){

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<publish_page name="印象上外" logo_url="http://www.gokuai.com/Common/images/logo/logo100x40_black.png" background_color="#F3F3F4" uploadAllowExt="mp4|mkv|rm|rmvb|avi|3gp|flv|wmv|asf|mpeg">
+<publish_page name="印象上外" logo_url="" background_color="#F3F3F4" uploadAllowExt="mp4|mkv|rm|rmvb|avi|3gp|flv|wmv|asf|mpeg">
     <nodes name="党建在线" base_path="印象上外/党建在线">
     </nodes>
     <nodes name="热门讲座" base_path="印象上外/热门讲座">
