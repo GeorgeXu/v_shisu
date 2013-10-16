@@ -118,6 +118,7 @@ var gkHomeWorkDemo = {
 
         var nodes = _context.renderTreeList(PAGE_CONFIG.xmlData['nodes']);
         _context.zTreeObj = $.fn.zTree.init($('.node_list'), setting, nodes);
+        $('#ztree a:first').click();
     },
     getBaseNode: function (node) {
         return  node['data-base_path'] ? node : node.getParentNode();
@@ -128,7 +129,6 @@ var gkHomeWorkDemo = {
         var selectNode = _context.zTreeObj.getSelectedNodes()[0];
         var baseNode = _context.getBaseNode(selectNode);
         var fullpath = baseNode['data-base_path'] + '/' + path;
-        $('.main').loader();
         $('.main').loader();
         _context.getFileList(fullpath, function (data) {
             $.loader.close();
