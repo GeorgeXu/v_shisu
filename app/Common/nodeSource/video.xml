@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<publish_page name="印象上外" logo_url="" background_color="#F3F3F4" uploadAllowExt="mp4|mkv|rm|rmvb|avi|3gp|flv|wmv|asf|mpeg">
-    <nodes name="党建在线" base_path="印象上外/党建在线">
+<publish_page name="印象上外" logo_url="" background_color="#F3F3F4" uploadAllowExt="jpg|png|mp4|mkv|rm|rmvb|avi|3gp|flv|wmv|asf|mpeg">
+    <nodes name="党建在线" base_path="印象上外/党建在线" access="upload|download|view">
     </nodes>
-    <nodes name="热门讲座" base_path="印象上外/热门讲座">
+    <nodes name="热门讲座" base_path="印象上外/热门讲座" access="upload|download|view">
     </nodes>
-    <nodes name="西索光影" base_path="印象上外/西索光影">
+    <nodes name="西索光影" base_path="印象上外/西索光影" access="upload|download|view">
     </nodes>
-    <nodes name="外语资源" base_path="印象上外/外语资源">
+    <nodes name="外语资源" base_path="印象上外/外语资源" access="upload|download|view">
     </nodes>
-
 </publish_page>

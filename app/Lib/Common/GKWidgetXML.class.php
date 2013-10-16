@@ -64,6 +64,15 @@ class GKWidgetXML {
         }
     }
 
+    public function addAttr($base_path, $attrs){
+        $nodes = $this->xmlDom->xpath('/publish_page/nodes[@base_path="' . $base_path . '"]');
+        if ($nodes) {
+            foreach ($attrs as $k => $v) {
+                $nodes[0]->addAttribute($k, $v);
+            }
+        }
+    }
+
     public function getXmlDom() {
         return $this->xmlDom;
     }
@@ -74,7 +83,7 @@ class GKWidgetXML {
         $checkPath = $relPath;
         $node = null;
         while(!$node && $checkPath){
-            $xpathQuery = '/publish_page/nodes[@base_path="'.$basePath.'"]/node[@path="'.$checkPath.'"][@'.$attrName.']';
+            $xpathQuery = '/publish_page/nodes[@base_path="'.$basePath.'"][@path="'.$checkPath.'"][@'.$attrName.']';
             $node = $this->xmlDom->xpath($xpathQuery);
             $checkPath = get_dir_path($checkPath);
         }

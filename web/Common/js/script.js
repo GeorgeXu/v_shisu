@@ -105,16 +105,7 @@ var gkHomeWorkDemo = {
         var _context = this;
         var setting = {
             treeId: 'node_list',
-            view: {
-                //nameIsHTML: true
-            },
             callback: {
-                beforeClick: function (treeId, treeNode) {
-                    if (typeof treeNode['data-base_path'] !== 'undefined') {
-                        return false;
-                    }
-                    return true;
-                },
                 onClick: function (event, treeId, treeNode, clickFlag) {
                     var file = {
                         path: treeNode['data-path'],
@@ -157,7 +148,7 @@ var gkHomeWorkDemo = {
             PAGE_CONFIG.basePath = baseNode['data-base_path'];
 
             var meta = {
-                breads: _context.getBreads(PAGE_CONFIG.path),
+                breads: _context.getBreads(PAGE_CONFIG.path, [baseNode.name]),
                 files: files,
                 current_node: node,
                 access: PAGE_CONFIG.access
@@ -461,12 +452,12 @@ var gkHomeWorkDemo = {
             $('.file_list').scrollTop(0);
         });
     },
-    getBreads: function (path) {
+    getBreads: function (path, showNames) {
         path = Util.String.rtrim(Util.String.ltrim(path, '/'), '/');
         var paths = path.split('/'), breads = [], bread;
         for (var i = 0; i < paths.length; i++) {
             bread = {
-                name: paths[i]
+                name: showNames[i] || paths[i]
             };
             var fullpath = '';
             for (var j = 0; j <= i; j++) {
@@ -526,9 +517,7 @@ var gkHomeWorkDemo = {
         var name = n['@attributes']['name'];
         var item = {
             'tId': '',
-            'name': name,
-            'open': true,
-            'children': []
+            'name': name
         };
         if (typeof n['@attributes']['base_path'] !== 'undefined') {
             item['data-base_path'] = n['@attributes']['base_path'];
@@ -536,15 +525,6 @@ var gkHomeWorkDemo = {
         if (typeof n['@attributes']['path'] !== 'undefined') {
             item['data-path'] = n['@attributes']['path'];
             item['data-access'] = n['@attributes']['access'];
-        }
-        var node = n['node'];
-        if (node) {
-            if(!$.isArray(node)){
-                node = [node];
-            }
-            for (var i = 0; i < node.length; i++) {
-                item['children'].push(_context.renderTreeItem(node[i]));
-            }
         }
         return item;
     },

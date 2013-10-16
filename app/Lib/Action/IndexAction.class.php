@@ -21,7 +21,7 @@ class IndexAction extends Action
             $this->member = $member;
             $this->assign('member',$member);
             $this->gkWidget = new GKWidgetXML(APP_PATH . 'Common/nodeSource/video.xml');
-            $this->addTmplNode();
+            $this->addTmplAttr();
             $this->gkClient = new GokuaiClient(self::CLIENT_ID, self::CLIENT_SECRET);
             if (!$this->gkClient->login(self::GK_ACCOUNT, md5(self::GK_PASSWORD))) {
                 if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
@@ -42,17 +42,15 @@ class IndexAction extends Action
     }
 
     /**
-     * 添加临时节点
+     * 添加临时属性
      */
-    private function addTmplNode(){
+    private function addTmplAttr(){
         $nodes = $this->gkWidget->getNodes();
         $new_node = [
-            'name'=>$this->member['name'],
-            'path'=>$this->member['name'],
-            'access'=>'upload|download|view'
+            'path' => $this->member['id'] . '-' . $this->member['name']
         ];
         foreach($nodes as $v){
-            $this->gkWidget->addNode($v['@attributes']['base_path'],$new_node);
+            $this->gkWidget->addAttr($v['@attributes']['base_path'], $new_node);
         }
     }
 
