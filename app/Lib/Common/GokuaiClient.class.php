@@ -100,6 +100,24 @@ class GokuaiClient {
     }
 
     /**
+     * 添加注释
+     * @param string $fullpath 待创建的文件夹的完整路径
+     * @param string $keywords
+     * @param string $mount
+     * @return bool|array
+     */
+    public function setKeywords($fullpath, $keywords = '', $mount = 'gokuai') {
+        $url = self::API_URL . '/1/file/keyword';
+        $parameters = array('token' => $this->token,
+            'fullpath' => $fullpath,
+            'keywords' => $keywords,
+            'mount' => $mount);
+        $parameters['sign'] = $this->getSign($parameters);
+        $this->response = self::http($url, 'POST', $parameters, array(), $this->http_code, $this->error);
+        return $this->handleResponse();
+    }
+
+    /**
      * 获取文件上传地址
      * @param string $fullpath 待上传的文件完整路径
      * @param string $mount

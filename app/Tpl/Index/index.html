@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>印象上外</title>
     <link type="text/css" rel="stylesheet" href="/Common/js/lib/bootstrap/css/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="/Common/css/base.css" />
     <link type="text/css" rel="stylesheet" href="/Common/js/lib/zTree/css/zTreeStyle/zTreeStyle.css" />
@@ -88,7 +88,8 @@
                         <div class="form-group">
                             <label for="video_uploader" class="col-sm-2 control-label">上传者</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" id="video_uploader" placeholder="" value="{$member['name']}" />
+                                <span class="form-control" disabled>{$member['name']}</span>
+                                <input id="video_uploader" type="hidden" value="{$member['name']}" />
                             </div>
                         </div>
                         <input type="hidden" value="" id="video_tmp_path"/>

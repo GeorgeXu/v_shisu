@@ -270,6 +270,7 @@ class IndexAction extends Action
                     throw new Exception($result['error_msg'], $result['error_code']);
                 }
                 @unlink($tmp_path);
+                $this->gkClient->setKeywords(dirname($result['fullpath']) . '/', $introduction);
             }
             echo json_encode($result);
         }catch(Exception $e){
