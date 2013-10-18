@@ -16,8 +16,24 @@ class AccountAction extends Action {
         return $_SESSION['member'];
     }
 
+    public static function dispatch($logined, $returnurl = '') {
+        if ($logined) {
+            if ($returnurl) {
+                $url = $returnurl;
+            } else {
+                $url = '/';
+            }
+        } else {
+            $url = '/login';
+            if ($returnurl) {
+                $url .= '?returnurl=' . rawurlencode($returnurl);
+            }
+        }
+        header('Location: ' . $url);
+    }
+
     /**
-     * 登陆页面
+     * 登录页面
      */
     public function login() {
         try {
@@ -38,7 +54,7 @@ class AccountAction extends Action {
     }
 
     /**
-     * oauth登陆成功后的回调
+     * oauth登录成功后的回调
      */
     public function oauth_login() {
         try {

@@ -33,9 +33,10 @@ class IndexAction extends Action
             }
         }else{
             if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-                ErrorAction::show_ajax('请先登陆', 401000);
+                ErrorAction::show_ajax('请先登录', 401000);
             } else {
-                ErrorAction::show_page('请先登陆', 401000);
+                AccountAction::dispatch(false);
+                exit;
             }
         }
 
