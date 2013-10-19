@@ -4,15 +4,14 @@
 </div>
 <div class="filename">
     {{if file.dir==1}}
-    <a class="name" href="javascript:void(0)">${file.filename}</a>
+    <a class="name" href="javascript:void(0)" title="${file.filename}">${file.filename}</a>
     {{else}}
     {{if gkHomeWorkDemo.checkAuth('download',access)}}
-    <a class="name" href="/index/download_file?path=${encodeURIComponent(file.fullpath)}">${file.filename}</a>
+    <a class="name" href="/index/download_file?path=${encodeURIComponent(file.fullpath)}" title="${file.filename}">${file.filename}</a>
     {{else}}
-    <span class="name">${file.filename}</span>
+    <span class="name" title="${file.filename}">${file.filename}</span>
     {{/if}}
 
     {{/if}}
-
 </div>
 </div>
