@@ -165,9 +165,8 @@ class IndexAction extends Action {
 
             $video_folder_path = APP_PATH . 'Common/uploads';
             @mkdir($video_folder_path, 0777);
-            $video_path = $video_folder_path . DIRECTORY_SEPARATOR . 'video';
-            $re = move_uploaded_file($file['tmp_name'], $video_path);
-            if (!$re) {
+            $video_path = $video_folder_path . DIRECTORY_SEPARATOR . round(microtime(true) * 1000);
+            if (!move_uploaded_file($file['tmp_name'], $video_path)) {
                 throw new Exception('无法移动上传文件', 400);
             }
             echo json_encode(['tmp_path' => $video_path]);
@@ -203,7 +202,7 @@ class IndexAction extends Action {
             $folder_path = $path . '/' . $folder_name;
             $info_fullpath = $folder_path . '/info.xml';
             $ext = get_file_ext(basename($name));
-            $filename = 'video' . ($ext ? '.' . $ext : '');
+            $filename = 'file' . ($ext ? '.' . $ext : '');
             $data = [
                 'name' => $name,
                 'uploader' => $uploader,
