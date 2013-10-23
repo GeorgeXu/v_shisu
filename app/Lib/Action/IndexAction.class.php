@@ -40,6 +40,10 @@ class IndexAction extends Action {
 
     }
 
+    private static function getTempUploadPath() {
+        return APP_PATH . 'Common/uploads';
+    }
+
     /**
      * 添加临时属性
      */
@@ -163,13 +167,12 @@ class IndexAction extends Action {
                 throw new Exception($error, 400);
             }
 
-            $video_folder_path = APP_PATH . 'Common/uploads';
-            @mkdir($video_folder_path, 0777);
-            $video_path = $video_folder_path . DIRECTORY_SEPARATOR . round(microtime(true) * 1000);
+            $tmp_filename = round(microtime(true) * 1000);
+            $video_path = self::getTempUploadPath() . DIRECTORY_SEPARATOR . $tmp_filename;
             if (!move_uploaded_file($file['tmp_name'], $video_path)) {
                 throw new Exception('无法移动上传文件', 400);
             }
-            echo json_encode(['tmp_path' => $video_path]);
+            echo json_encode(['tmp_path' => $tmp_filename]);
         } catch (Exception $e) {
             echo json_encode(['error_code' => $e->getCode(), 'error_msg' => $e->getMessage()]);
         }
@@ -231,7 +234,8 @@ class IndexAction extends Action {
             if ($code) {
                 $result = $this->gkClient->save($code, '', $folder_path, 'team', $filename);
             } else {
-                $tmp_path = $_POST['video_tmp_path'];
+                $tmp_filename = $_POST['video_tmp_path'];
+                $tmp_path = self::getTempUploadPath() . DIRECTORY_SEPARATOR . $tmp_filename;
                 $video_fullpath = $folder_path . '/' . $filename;
                 $result = $this->gkClient->uploadByFilename($tmp_path, $server, $video_fullpath, 'team');
                 if (!$result) {
