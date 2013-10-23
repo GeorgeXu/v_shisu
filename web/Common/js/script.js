@@ -536,7 +536,7 @@ var gkHomeWorkDemo = {
         } else {
             var ext = Util.String.getExt(filename);
             if ($.inArray(ext, sorts['SORT_MOVIE']) > -1) {
-                suffix = 'movie';
+                suffix = 'video';
             } else if ($.inArray(ext, sorts['SORT_MUSIC']) > -1) {
                 suffix = 'music';
             } else if ($.inArray(ext, sorts['SORT_IMAGE']) > -1) {

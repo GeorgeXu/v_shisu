@@ -13,6 +13,7 @@ class IndexAction extends Action {
     private $member;
 
     function __construct() {
+        ignore_user_abort(true);
         parent::__construct();
         $member = AccountAction::get_member();
         if ($member) {
