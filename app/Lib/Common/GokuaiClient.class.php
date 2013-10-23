@@ -109,9 +109,9 @@ class GokuaiClient {
     public function setKeywords($fullpath, $keywords = '', $mount = 'gokuai') {
         $url = self::API_URL . '/1/file/keyword';
         $parameters = array('token' => $this->token,
-            'fullpath' => $fullpath,
-            'keywords' => $keywords,
-            'mount' => $mount);
+                            'fullpath' => $fullpath,
+                            'keywords' => $keywords,
+                            'mount' => $mount);
         $parameters['sign'] = $this->getSign($parameters);
         $this->response = self::http($url, 'POST', $parameters, array(), $this->http_code, $this->error);
         return $this->handleResponse();
@@ -142,15 +142,15 @@ class GokuaiClient {
      * @param string $to_mount
      * @return bool|array
      */
-    public function save($code , $path = '', $to_fullpath = '', $to_mount = 'gokuai',$filename='') {
+    public function save($code, $path = '', $to_fullpath = '', $to_mount = 'gokuai', $filename = '') {
         $url = self::API_URL . '/1/file/save';
         $parameters = array('token' => $this->token,
                             'code' => $code,
                             'path' => $path,
                             'to_fullpath' => $to_fullpath,
                             'to_mount' => $to_mount,
-                            'filename'=>$filename
-                        );
+                            'filename' => $filename
+        );
         $parameters['sign'] = $this->getSign($parameters);
         $this->response = self::http($url, 'POST', $parameters, array(), $this->http_code, $this->error);
         return $this->handleResponse();
@@ -176,7 +176,7 @@ class GokuaiClient {
         $parameters['sign'] = $this->getSign($parameters);
         $parameters['filefield'] = 'file';
         $parameters['file'] = '@' . $filepath;
-        $this->response = self::http($url, 'POST', $parameters, array(), $this->http_code, $this->error, true);
+        $this->response = self::http($url, 'POST', $parameters, array(), $this->http_code, $this->error, ['postfields' => true, 'timeout' => 3600]);
         return $this->handleResponse();
     }
 
@@ -205,7 +205,7 @@ class GokuaiClient {
         $url = trim($url, '&');
         $key = "file\"; filename=\"file\"\r\nContent-Type: application/octet-stream\r\nAccept: \"";
         $posts = array($key => $content);
-        $this->response = self::http($url, 'POST', $posts, array(), $this->http_code, $this->error, true);
+        $this->response = self::http($url, 'POST', $posts, array(), $this->http_code, $this->error, ['postfields' => true, 'timeout' => 3600]);
         return $this->handleResponse();
     }
 
@@ -264,15 +264,18 @@ class GokuaiClient {
         }
     }
 
-    private static function http($url, $method, $data = '', array $headers = array(), &$http_code = 0, &$error = '', $postfields = false) {
+    private static function http($url, $method, $data = '', array $headers = array(), &$http_code = 0, &$error = '', $options = []) {
         try {
+            $postfields = array_map_assert($options, 'postfields', false);
+            $connect_timeout = array_map_assert($options, 'connect_timeout', 10);
+            $timeout = array_map_assert($options, 'timeout', 120);
             $ch = curl_init($url);
             if (stripos($url, "https://") !== false) {
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             }
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 60);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connect_timeout);
+            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
             curl_setopt($ch, CURLOPT_HEADER, 0);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             $fields_string = '';

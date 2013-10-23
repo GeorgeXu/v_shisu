@@ -87,10 +87,21 @@ function get_dir_path($fullpath) {
 
 //获取文件扩展名
 function get_file_ext($filename) {
-    $pos = strrpos($filename, ".");
+    $pos = strrpos($filename, '.');
     if ($pos !== false) {
         return strtolower(substr($filename, $pos + 1));
     } else {
         return '';
     }
+}
+
+/**
+ * 根据key获取数组中值, 如果key不存在则返回默认值
+ * @param array $arr
+ * @param string $key
+ * @param bool $default
+ * @return mixed
+ */
+function array_map_assert(array $arr, $key, $default = false) {
+    return array_key_exists($key, $arr) ? $arr[$key] : $default;
 }
