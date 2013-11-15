@@ -4,29 +4,32 @@
     <title>影像上外</title>
     <link type="text/css" rel="stylesheet" href="/Common/js/lib/bootstrap/css/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="/Common/css/base.css" />
-    <link type="text/css" rel="stylesheet" href="/Common/js/lib/zTree/css/zTreeStyle/zTreeStyle.css" />
-    <link type="text/css" rel="stylesheet" href="/Common/css/style.css" />
+    <link type="text/css" rel="stylesheet" href="/Common/js/lib/zTree/css/zTreeStyle/zTreeStyle.css"/>
+    <link type="text/css" rel="stylesheet" href="/Common/css/style.css?v=2013111501" />
     <script type="text/javascript" src="/Common/js/util.js"></script>
     <script type="text/javascript" src="/Common/js/lib/json2.js"></script>
     <script type="text/javascript" src="/Common/js/lib/jquery.js"></script>
     <script src="https://www.gokuai.com/index/gkc " type="text/javascript"></script>
     <script type="text/javascript" src="/Common/js/lib/jquery-ui/jquery.ui.widget.js"></script>
     <script type="text/javascript" src="/Common/js/lib/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/Common/js/lib/zTree/js/jquery.ztree.core-3.5.min.js"></script>
+    <script type="text/javascript" src="/Common/js/lib/zTree/js/jquery.ztree.all-3.5.min.js"></script>
     <script type="text/javascript" src="/Common/js/component/alert.js"></script>
     <script type="text/javascript" src="/Common/js/component/loader.js"></script>
     <script type="text/javascript" src="/Common/js/lib/jquery.tmpl.min.js"></script>
     <script type="text/javascript" src="/Common/js/lib/jquery-fileupload/jquery.iframe-transport.js"></script>
     <script type="text/javascript" src="/Common/js/lib/jquery-fileupload/jquery.fileupload.js"></script>
-    <script type="text/javascript" src="/Common/js/script.js?v=2013102301"></script>
-
+    <script type="text/javascript" src="/Common/js/script.js?v=2013111501"></script>
     <script type="text/javascript">
         var PAGE_CONFIG = {
-            xmlData: $.parseJSON('{$xml_data}')
-        }
+            tree:null,
+            path:'',
+            userName:'{$user_name}',
+            baseName:'{$base_name}',
+            basePath:'{$base_path}'
+        };
         $(function(){
             gkHomeWorkDemo.init();
-        })
+        });
     </script>
 </head>
 <body style="background-color:{$background_color}">
@@ -40,9 +43,6 @@
             </div>
         </div>
         <div class="main c_f">
-            <div class="sidebar">
-                <div class="ztree node_list" id="ztree"></div>
-            </div>
             <div class='content'>
 
             </div>
@@ -51,12 +51,12 @@
     </div>
 
     <!-- 上传视频 Modal -->
-    <div class="modal fade" id="uploadVideoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="uploadVideoModal" tabindex="-1" role="dialog" aria-labelledby="uploadVideoModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel">请填写视频信息</h4>
+                    <h4 class="modal-title" id="uploadVideoModalLabel">请填写视频信息</h4>
                 </div>
                 <div class="modal-body">
                     <form class="form-horizontal" role="form">
@@ -70,13 +70,20 @@
                                 </span>
                                     <button class="btn btn-default select_from_gokuai">从够快中选择</button>
                                 </div>
-
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="video_name" class="col-sm-2 control-label">视频名称</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="video_name" placeholder="" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="video_categories" class="col-sm-2 control-label">视频栏目</label>
+                            <div class="col-sm-10">
+                                <span id="video_categories_name"></span>
+                                <button class="btn btn-link category_btn" type="button" data-toggle="modal" data-target="#categoryModal">选择栏目</button>
+                                <input type="hidden" id="video_categories" />
                             </div>
                         </div>
                         <div class="form-group">
@@ -98,6 +105,24 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary ok" disabled>确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="categoryModalLabel">请选择视频栏目</h4>
+                </div>
+                <div class="modal-body">
+                    <ul id="category_tree" class="ztree" ></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary ok">确定</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
                 </div>
             </div>

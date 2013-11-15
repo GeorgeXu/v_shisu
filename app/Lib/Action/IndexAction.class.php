@@ -1,28 +1,26 @@
 <?php
 
-class IndexAction extends Action {
-
-    const CLIENT_ID = '818f83a6e217eb7152b28ba14fd31377';
-    const CLIENT_SECRET = '18d0df158975b9fa33366bcf69586fdb';
-    const GK_ACCOUNT = 'xugetest3@126.com';
-    const GK_PASSWORD = '111111';
-    const VIDEO_INTRODUCTION_LENGTH_LIMIT = 200;
-    private $gkClient;
-    private $gkWidget;
-    private $xmlDom;
+class IndexAction extends Action
+{
+    private $gk_client;
+    private $gk_widget;
     private $member;
+    private $description_max_length;
 
-    function __construct() {
+    function __construct()
+    {
         ignore_user_abort(true);
         parent::__construct();
         $member = AccountAction::get_member();
         if ($member) {
             $this->member = $member;
             $this->assign('member', $member);
-            $this->gkWidget = new GKWidgetXML(APP_PATH . 'Common/nodeSource/video.xml');
+            $this->gk_widget = new GKWidgetXML(APP_PATH . 'Conf/video.xml');
             $this->addTmplAttr();
-            $this->gkClient = new GokuaiClient(self::CLIENT_ID, self::CLIENT_SECRET);
-            if (!$this->gkClient->login(self::GK_ACCOUNT, md5(self::GK_PASSWORD))) {
+            $config = require APP_PATH . 'Conf/gokuai.php';
+            $this->description_max_length = $config['description_max_length'];
+            $this->gk_client = new GokuaiClient($config['client_id'], $config['client_secret']);
+            if (!$this->gk_client->login($config['user'], md5($config['password']))) {
                 if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
                     ErrorAction::show_ajax('授权失败', 403000);
                 } else {
@@ -41,52 +39,70 @@ class IndexAction extends Action {
 
     }
 
-    private static function getTempUploadPath() {
+    private static function getTempUploadPath()
+    {
         return APP_PATH . 'Common/uploads';
     }
 
     /**
      * 添加临时属性
      */
-    private function addTmplAttr() {
-        $nodes = $this->gkWidget->getNodes();
+    private function addTmplAttr()
+    {
+        $nodes = $this->gk_widget->getNodes();
         $new_node = [
             'path' => $this->member['id'] . '-' . $this->member['name']
         ];
         foreach ($nodes as $v) {
-            $this->gkWidget->addAttr($v['@attributes']['base_path'], $new_node);
+            $this->gk_widget->addAttr($v['@attributes']['base_path'], $new_node);
         }
     }
 
     /**
      * 主页
      */
-    public function index() {
-        $xmlDom = $this->gkWidget->getXmlDom();
-        $publishPage = $xmlDom;
-        $xmlData = $xmlData = json_encode($xmlDom);
-        $pageName = $publishPage['name'] ? $publishPage['name'] : '未命名';
-        $backgroundColor = $publishPage['background_color'];
-        $logoUrl = $publishPage['logo_url'];
-        $this->assign('page_name', $pageName);
-        $this->assign('background_color', $backgroundColor);
-        $this->assign('logo_url', $logoUrl);
-        $this->assign('xml_data', $xmlData);
-        $this->display();
+    public function index()
+    {
+        try {
+            $xml = $this->gk_widget->getXmlDom();
+            $page_name = $xml['name'] ? (string)$xml['name'] : '未命名';
+            $background_color = (string)$xml['background_color'];
+            $logo_url = (string)$xml['logo_url'];
+            $base_name = '';
+            $base_path = '';
+            foreach ($xml->nodes as $node) {
+                $base_name = (string)$node->attributes()['name'];
+                $base_path = (string)$node->attributes()['base_path'];
+            }
+            if (!strlen($base_path)) {
+                throw new Exception('video.xml中未定义base_path', 400);
+            }
+            $user_name = $this->member['id'] . '-' . $this->member['name'];
+            $this->assign('page_name', $page_name);
+            $this->assign('background_color', $background_color);
+            $this->assign('logo_url', $logo_url);
+            $this->assign('user_name', $user_name);
+            $this->assign('base_name', $base_name);
+            $this->assign('base_path', $base_path);
+            $this->display();
+        } catch (Exception $e) {
+            ErrorAction::show_page($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
      * 文件列表
      */
-    public function file_list() {
+    public function file_list()
+    {
         $path = $_GET['path'];
         GKWidgetXML::checkPath($path);
-        if ($this->gkWidget->checkNodeAuth('view', $path, $access)) {
-            $list = $this->gkClient->getFileList($path, 0, 'team');
+        if ($this->gk_widget->checkNodeAuth('view', $path, $access)) {
+            $list = $this->gk_client->getFileList($path, 0, 'team');
         } else {
             $list = [];
         }
-        $uploadAllowExt = $this->gkWidget->getFeature($path, 'uploadAllowExt');
+        $uploadAllowExt = $this->gk_widget->getFeature($path, 'uploadAllowExt');
         $list['access'] = $access;
         $list['uploadAllowExt'] = $uploadAllowExt;
         echo json_encode($list);
@@ -95,14 +111,15 @@ class IndexAction extends Action {
     /**
      * 下载文件
      */
-    public function download_file() {
+    public function download_file()
+    {
         try {
             $path = $_GET['path'];
             GKWidgetXML::checkPath($path);
-            if (!$this->gkWidget->checkNodeAuth('download', $path)) {
+            if (!$this->gk_widget->checkNodeAuth('download', $path)) {
                 throw new Exception('没用权限下载改文件', 403);
             }
-            $fileinfo = $this->gkClient->getFileInfo($path);
+            $fileinfo = $this->gk_client->getFileInfo($path);
             if ($fileinfo['uri']) {
                 header('Location:' . $fileinfo['uri']);
             }
@@ -115,21 +132,21 @@ class IndexAction extends Action {
     /**
      * 上传文件
      */
-    public function upload_file() {
+    public function upload_file()
+    {
         try {
             $path = $_POST['path'];
             GKWidgetXML::checkPath($path);
-            if (!$this->gkWidget->checkNodeAuth('upload', $path)) {
+            if (!$this->gk_widget->checkNodeAuth('upload', $path)) {
                 throw new Exception('你没有权限在该文件夹下上传文件', 400);
             }
-
             $filefield = $_POST['filefield'] ? $_POST['filefield'] : 'file';
             $file = $_FILES[$filefield];
             if (!isset($file)) {
                 throw new Exception('文件上传失败', 400);
             }
             $name = $file['name'];
-            $uploadAllowExt = $this->gkWidget->getFeature($path, 'uploadAllowExt');
+            $uploadAllowExt = $this->gk_widget->getFeature($path, 'uploadAllowExt');
             if ($uploadAllowExt) {
                 $ext = get_file_ext($name);
                 $extArr = explode('|', $uploadAllowExt);
@@ -137,7 +154,6 @@ class IndexAction extends Action {
                     throw new Exception('只允许上传 ' . join('、', $extArr), 403);
                 }
             }
-
             if ($file['error'] > 0) {
                 switch ($file['error']) {
                     case '1':
@@ -167,7 +183,6 @@ class IndexAction extends Action {
 
                 throw new Exception($error, 400);
             }
-
             $tmp_filename = round(microtime(true) * 1000);
             $video_path = self::getTempUploadPath() . DIRECTORY_SEPARATOR . $tmp_filename;
             if (!move_uploaded_file($file['tmp_name'], $video_path)) {
@@ -182,7 +197,8 @@ class IndexAction extends Action {
     /**
      * 设置视频信息
      */
-    public function set_video_info() {
+    public function set_video_info()
+    {
         try {
             $code = $_POST['video_code'];
             $name = $_POST['video_name'];
@@ -190,9 +206,19 @@ class IndexAction extends Action {
                 throw new Exception('视频名称不能为空', 400);
             }
             self::checkFilenameVaild($name);
+            $video_cid = $_POST['video_cid'];
+            $video_cids = explode(',', $video_cid);
+            foreach ($video_cids as $k => $v) {
+                if (!is_numeric($k)) {
+                    unset($video_cids[$k]);
+                }
+            }
+            if (!$video_cids) {
+                throw new Exception('请选择视频栏目', 400);
+            }
             $introduction = $_POST['video_introduction'];
-            if (mb_strlen($introduction, 'utf8') > self::VIDEO_INTRODUCTION_LENGTH_LIMIT) {
-                throw new Exception('视频简介的字数不能超过' . self::VIDEO_INTRODUCTION_LENGTH_LIMIT, 400);
+            if (mb_strlen($introduction, 'utf8') > $this->description_max_length) {
+                throw new Exception('视频简介的字数不能超过' . $this->description_max_length, 400);
             }
             $uploader = $_POST['video_uploader'];
             if (!strlen($uploader)) {
@@ -211,6 +237,7 @@ class IndexAction extends Action {
                 'name' => $name,
                 'uploader' => $uploader,
                 'introduction' => $introduction,
+                'cid' => implode(',', $video_cids),
                 'filename' => $filename,
             ];
             $string = "<?xml version='1.0' encoding='utf-8'?><video></video>";
@@ -220,11 +247,11 @@ class IndexAction extends Action {
             }
             $content = $xml->asXML();
 
-            $server = $this->gkClient->getUploadServer($folder_path, 'team');
+            $server = $this->gk_client->getUploadServer($folder_path, 'team');
             if (!$server) {
                 throw new Exception('获取上传服务器地址失败', 500);
             }
-            $re = $this->gkClient->uploadByContent($content, $server, $info_fullpath, 'team');
+            $re = $this->gk_client->uploadByContent($content, $server, $info_fullpath, 'team');
             if (!$re) {
                 throw new Exception('文件上传到够快失败', 500);
             }
@@ -233,12 +260,12 @@ class IndexAction extends Action {
                 throw new Exception($re['error_msg'], $re['error_code']);
             }
             if ($code) {
-                $result = $this->gkClient->save($code, '', $folder_path, 'team', $filename);
+                $result = $this->gk_client->save($code, '', $folder_path, 'team', $filename);
             } else {
                 $tmp_filename = $_POST['video_tmp_path'];
                 $tmp_path = self::getTempUploadPath() . DIRECTORY_SEPARATOR . $tmp_filename;
                 $video_fullpath = $folder_path . '/' . $filename;
-                $result = $this->gkClient->uploadByFilename($tmp_path, $server, $video_fullpath, 'team');
+                $result = $this->gk_client->uploadByFilename($tmp_path, $server, $video_fullpath, 'team');
                 if (!$result) {
                     throw new Exception('文件上传到够快失败', 500);
                 }
@@ -246,7 +273,7 @@ class IndexAction extends Action {
                     throw new Exception($result['error_msg'], $result['error_code']);
                 }
                 @unlink($tmp_path);
-                $this->gkClient->setKeywords(dirname($result['fullpath']) . '/', $introduction);
+                $this->gk_client->setKeywords(dirname($result['fullpath']) . '/', $introduction);
             }
             echo json_encode($result);
         } catch (Exception $e) {
@@ -259,7 +286,8 @@ class IndexAction extends Action {
      * @param $filename
      * @throws Exception
      */
-    public static function checkFilenameVaild($filename) {
+    public static function checkFilenameVaild($filename)
+    {
         if ($filename == '.' || $filename == '..') {
             throw new Exception('文件名称不能是.或者..', 4000322);
         }

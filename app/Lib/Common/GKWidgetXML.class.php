@@ -80,13 +80,17 @@ class GKWidgetXML {
     public function getFeature($fullpath,$attrName){
         $fullpath = trim($fullpath, '/');
         $this->getBasePathAndRelPathByfullpath($fullpath,$basePath,$relPath);
-        $checkPath = $relPath;
+        $checkPath = $fullpath;
         $node = null;
-        while(!$node && $checkPath){
-            $xpathQuery = '/publish_page/nodes[@base_path="'.$basePath.'"][@path="'.$checkPath.'"][@'.$attrName.']';
+        do {
+            if (strlen($checkPath)) {
+                $xpathQuery = '/publish_page/nodes[@base_path="'.$basePath.'"][@path="'.$checkPath.'"][@'.$attrName.']';
+            } else {
+                $xpathQuery = '/publish_page/nodes[@base_path="'.$basePath.'"][@'.$attrName.']';
+            }
             $node = $this->xmlDom->xpath($xpathQuery);
             $checkPath = get_dir_path($checkPath);
-        }
+        } while (!$node && $checkPath !== false);
         if(!$node){
             return (string)$this->xmlDom->attributes()[$attrName];
         }

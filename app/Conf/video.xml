@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<publish_page name="影像上外" logo_url="" background_color="#F3F3F4" uploadAllowExt="jpg|png|mp4|mkv|rm|rmvb|avi|3gp|flv|wmv|asf|mpeg">
+    <nodes name="影像上外" base_path="影像上外" access="upload|download|view" />
+</publish_page>

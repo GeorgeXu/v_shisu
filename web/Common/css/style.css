@@ -118,9 +118,9 @@
 }
 
 .content{
-    width:800px;
+    width:100%;
     position: absolute;
-    left:200px;
+    left:0;
     top:0;
     bottom:0;
     _height:100%;
@@ -251,4 +251,15 @@
 }
 #uploadVideoModal .modal-dialog{
     width: 600px;
+}
+#categoryModal .modal-dialog{
+    padding-top: 50px;
+    width:350px;
+}
+#categoryModal .modal-body {
+    padding: 12px 4px 0 4px;
+}
+#category_tree {
+    height:300px;
+    overflow:auto;
 }

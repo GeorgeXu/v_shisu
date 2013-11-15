@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<categories>
+    <category id="8" name="外语资料" nocheck="1">
+        <category id="1" name="英语">
+            <category id="15" name="新闻英语" />
+            <category id="16" name="新闻英语" />
+        </category>
+    </category>
+    <category id="6" name="西索光影">
+        <category id="63" name="视频新闻">
+        </category>
+        <category id="64" name="魅力上外">
+        </category>
+        <category id="65" name="专题视频">
+        </category>
+    </category>
+    <category id="7" name="缤纷校园">
+    </category>
+    <category id="8" name="热门讲座">
+        <category id="123" name="MBA教育中心" />
+    </category>
+    <category id="11" name="党建在线" nocheck="1">
+        <category id="61" name="党建专题讲座"  />
+        <category id="84" name="党建教育影片" />
+    </category>
+</categories>

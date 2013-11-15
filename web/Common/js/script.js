@@ -103,32 +103,26 @@ var gkHomeWorkDemo = {
     },
     init: function () {
         var _context = this;
-        var setting = {
-            treeId: 'node_list',
-            callback: {
-                onClick: function (event, treeId, treeNode, clickFlag) {
-                    var file = {
-                        path: treeNode['data-path'],
-                        name: treeNode['name']
-                    };
-                    _context.fetchFileList(file);
-                }
-            }
+        var file = {
+            path: '/' + PAGE_CONFIG.userName
         };
-
-        var nodes = _context.renderTreeList(PAGE_CONFIG.xmlData['nodes']);
-        _context.zTreeObj = $.fn.zTree.init($('.node_list'), setting, nodes);
-        $('#ztree a:first').click();
-    },
-    getBaseNode: function (node) {
-        return  node['data-base_path'] ? node : node.getParentNode();
+        _context.fetchFileList(file);
     },
     fetchFileList: function (node) {
         var _context = this;
-        var path = node.path;
-        var selectNode = _context.zTreeObj.getSelectedNodes()[0];
-        var baseNode = _context.getBaseNode(selectNode);
-        var fullpath = baseNode['data-base_path'] + '/' + path;
+        if (typeof(node.path) == 'undefined' || !node.path.length) {
+            node.path = '/';
+        }
+        if (node.path.substr(0, 1) != '/') {
+            node.path = '/' + node.path;
+        }
+        PAGE_CONFIG.path = node.path;
+        var fullpath;
+        if (typeof(node.fullpath) == 'undefined') {
+            fullpath = PAGE_CONFIG.basePath + node.path;
+        } else {
+            fullpath = node.fullpath;
+        }
         $('.main').loader();
         _context.getFileList(fullpath, function (data) {
             $.loader.close();
@@ -144,11 +138,9 @@ var gkHomeWorkDemo = {
                 PAGE_CONFIG.access = data.access || '';
                 PAGE_CONFIG.uploadAllowExt =  data.uploadAllowExt;
             }
-            PAGE_CONFIG.path = path;
-            PAGE_CONFIG.basePath = baseNode['data-base_path'];
 
             var meta = {
-                breads: _context.getBreads(PAGE_CONFIG.path, [baseNode.name]),
+                breads: _context.getBreads(PAGE_CONFIG.path, [PAGE_CONFIG.userName]),
                 files: files,
                 current_node: node,
                 access: PAGE_CONFIG.access
@@ -159,6 +151,7 @@ var gkHomeWorkDemo = {
             _context.initFileItem($('.file_list .file_item'));
             _context.initShowUploadDialogBtn();
             _context.initCreateFolder();
+            _context.initShowCategoryDialogBtn();
 
         }, function () {
             $.loader.close();
@@ -183,7 +176,7 @@ var gkHomeWorkDemo = {
     initShowUploadDialogBtn:function(){
         var _context = this;
         var modal = $('#uploadVideoModal');
-        //modal.on('show.bs.modal',function(){
+        modal.on('show.bs.modal',function(){
             var col = $('#select_video_file').parents('.col-sm-10');
             col.find('.alert').remove();
             /**
@@ -193,15 +186,14 @@ var gkHomeWorkDemo = {
                 var uploadTip = '只允许上传 '+ PAGE_CONFIG.uploadAllowExt.split('|').join('、');
                 $('<div class="alert alert-info" />').text(uploadTip).appendTo(col);
             }
-
-        //});
+        });
         /**
          * modal显示后的回调
          */
         //modal.on('shown.bs.modal',function(){
             var _self = modal;
             var col = $('#select_video_file').parents('.col-sm-10');
-            var fullpath = PAGE_CONFIG.basePath ? PAGE_CONFIG.basePath + '/' + PAGE_CONFIG.path : PAGE_COFNIG.path;
+            var fullpath = PAGE_CONFIG.basePath ? PAGE_CONFIG.basePath + PAGE_CONFIG.path : PAGE_COFNIG.path;
             var formData = {
                 path:fullpath
             };
@@ -218,7 +210,6 @@ var gkHomeWorkDemo = {
                         return;
                     }
                     var files = data.files,file=files[0];
-                    var fileInput = modal.find('#select_video_file');
                     if(typeof file !=='undefined' && file.name){
                         if(!_context.checkFileExt(file.name)){
                             return;
@@ -253,7 +244,7 @@ var gkHomeWorkDemo = {
                         progress + '%'
                     );
                 }
-            })
+            });
 
             /**
              * 从够快中选择
@@ -309,7 +300,7 @@ var gkHomeWorkDemo = {
                     }
                 });
                 return false;
-            })
+            });
 
 
             //提交视频信息
@@ -322,6 +313,11 @@ var gkHomeWorkDemo = {
                 if(!_context.checkFilenameVaild(videoName)){
                     return;
                 }
+                var videoCid = _self.find('#video_categories').val();
+                if (!videoCid.length) {
+                    $.alert('请选择视频栏目');
+                    return;
+                }
                 var videoTmpPath = $.trim(_self.find('#video_tmp_path').val());
                 var videoIntroduction = $.trim(_self.find('#video_introduction').val());
                 var videoUploader = $.trim(_self.find('#video_uploader').val());
@@ -332,6 +328,7 @@ var gkHomeWorkDemo = {
                 var videoCode = _self.find('#video_code').val();
                 var params = {
                   video_name:videoName,
+                  video_cid:videoCid,
                   video_tmp_path:videoTmpPath,
                   video_introduction:videoIntroduction,
                   video_uploader:videoUploader,
@@ -371,8 +368,43 @@ var gkHomeWorkDemo = {
             col.find('>div').show();
             col.find('ul').remove();
             _self.find('form')[0].reset();
-        })
+            $('#video_categories').val('');
+            $('#video_categories_name').html('');
+        });
 
+    },
+    initShowCategoryDialogBtn:function(){
+        var modal = $('#categoryModal');
+        PAGE_CONFIG.tree = $.fn.zTree.init($('#category_tree'), {
+            view:{showIcon:false},
+            check:{enable:true,chkboxType:{Y:'',N:''}},
+            async:{enable:true,type:'get','url':'/account/categories'}
+        }, []);
+        modal.on('show.bs.modal',function(){
+            var selected_cids = $('#video_categories').val().split(',');
+            $.each(selected_cids, function(i,n){
+                var node = PAGE_CONFIG.tree.getNodeByParam('id', n);
+                if (node) {
+                    PAGE_CONFIG.tree.checkNode(node, true);
+                }
+            });
+        }).on('hidden.bs.modal',function(){
+            PAGE_CONFIG.tree.checkAllNodes(false);
+        });
+        modal.find('.ok').off('click').click(function(){
+            var nodes = PAGE_CONFIG.tree.getCheckedNodes();
+            var cids_input = $('#video_categories').val('');
+            var cids_span = $('#video_categories_name').html('');
+            nodes.forEach(function(n){
+                if (cids_input.val().length) {
+                    cids_input.val(cids_input.val() + ',');
+                    cids_span.text(cids_span.html() + ', ');
+                }
+                cids_input.val(cids_input.val() + n.id);
+                cids_span.text(cids_span.html() + n.name);
+            });
+            modal.modal('hide');
+        });
     },
     initCreateFolder: function () {
         var _context = this;
@@ -496,37 +528,6 @@ var gkHomeWorkDemo = {
                 $.isFunction(error) && success(error);
             }
         })
-    },
-    renderTreeList: function (nodes) {
-        var _context = this;
-        var renderList = [];
-        if(!$.isArray(nodes)){
-            nodes = [nodes];
-        }
-        //console.log(nodes);
-        if (nodes && nodes.length) {
-            $.each(nodes, function (i, n) {
-                var node = _context.renderTreeItem(n);
-                renderList.push(node);
-            });
-        }
-        return renderList;
-    },
-    renderTreeItem: function (n) {
-        var _context = this;
-        var name = n['@attributes']['name'];
-        var item = {
-            'tId': '',
-            'name': name
-        };
-        if (typeof n['@attributes']['base_path'] !== 'undefined') {
-            item['data-base_path'] = n['@attributes']['base_path'];
-        }
-        if (typeof n['@attributes']['path'] !== 'undefined') {
-            item['data-path'] = n['@attributes']['path'];
-            item['data-access'] = n['@attributes']['access'];
-        }
-        return item;
     },
     getFileIconSuffix: function (filename, dir) {
         var suffix = '';
