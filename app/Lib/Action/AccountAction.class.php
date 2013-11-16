@@ -7,7 +7,6 @@ class AccountAction extends Action
     function __construct()
     {
         parent::__construct();
-
     }
 
     /**
@@ -16,8 +15,8 @@ class AccountAction extends Action
      */
     public static function get_member()
     {
-//        return ['id' => 40300032, 'name' => 'ITC部门邮箱', 'email' => 'wink@gokuai.com'];
-        return $_SESSION['member'];
+        return ['id' => 40300032, 'name' => 'ITC部门邮箱', 'email' => 'wink@gokuai.com'];
+//        return $_SESSION['member'];
     }
 
     public static function dispatch($logined, $returnurl = '')
@@ -147,5 +146,55 @@ class AccountAction extends Action
         echo json_encode($result);
     }
 
+    public static function getGkclient()
+    {
+        $config = require APP_PATH . 'Conf/gokuai.php';
+        $gk_client = new GokuaiClient($config['client_id'], $config['client_secret']);
+        if ($gk_client->login($config['user'], md5($config['password']))) {
+            return $gk_client;
+        } else {
+            return false;
+        }
+    }
 
+    public function video_info()
+    {
+        try {
+            $gk_client = self::getGkclient();
+            if (!$gk_client) {
+                throw new Exception('授权失败', 403000);
+            }
+            $path = $_GET['path'];
+            $info_path = $path . '/info.xml';
+            if ($_POST['save']) {
+                $data = [
+                    'name' => $_POST['name'],
+                    'uploader' => $_POST['uploader'],
+                    'introduction' => $_POST['introduction'],
+                    'cid' => implode(',', $_POST['cid']),
+                    'filename' => $_POST['filename'],
+                ];
+                IndexAction::uploadVideoInfo($gk_client, dirname($info_path), $data, $server);
+            } else {
+                $info = $gk_client->getFileInfo($info_path, 'team');
+                if (!$info['uri']) {
+                    throw new Exception('无法获取info.xml的下载地址', 404);
+                }
+                $xml = simplexml_load_file($info['uri']);
+                if (!$xml) {
+                    throw new Exception('无法解析info.xml', 400);
+                }
+                $data = [
+                    'name' => (string)$xml->name,
+                    'uploader' => (string)$xml->uploader,
+                    'introduction' => (string)$xml->introduction,
+                    'cid' => (string)$xml->cid,
+                    'filename' => (string)$xml->filename
+                ];
+                echo json_encode($data);
+            }
+        } catch (Exception $e) {
+            ErrorAction::show_ajax($e->getMessage(), $e->getCode());
+        }
+    }
 }

@@ -19,14 +19,13 @@ class IndexAction extends Action
             $this->addTmplAttr();
             $config = require APP_PATH . 'Conf/gokuai.php';
             $this->description_max_length = $config['description_max_length'];
-            $this->gk_client = new GokuaiClient($config['client_id'], $config['client_secret']);
-            if (!$this->gk_client->login($config['user'], md5($config['password']))) {
+            $this->gk_client = AccountAction::getGkclient();
+            if (!$this->gk_client) {
                 if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
                     ErrorAction::show_ajax('授权失败', 403000);
                 } else {
                     ErrorAction::show_page('授权失败', 403000);
                 }
-                exit(0);
             }
         } else {
             if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
@@ -194,6 +193,28 @@ class IndexAction extends Action
         }
     }
 
+    public static function uploadVideoInfo(&$gk_client, $folder_path, array $data, &$server) {
+        $string = "<?xml version='1.0' encoding='utf-8'?><video></video>";
+        $xml = simplexml_load_string($string);
+        foreach ($data as $k => $v) {
+            $xml->addChild($k, $v);
+        }
+        $content = $xml->asXML();
+        $server = $gk_client->getUploadServer($folder_path, 'team');
+        if (!$server) {
+            throw new Exception('获取上传服务器地址失败', 500);
+        }
+        $info_fullpath = $folder_path . '/info.xml';
+        $re = $gk_client->uploadByContent($content, $server, $info_fullpath, 'team');
+        if (!$re) {
+            throw new Exception('文件上传到够快失败', 500);
+        }
+        if ($re['error_code']) {
+            throw new Exception($re['error_msg'], $re['error_code']);
+        }
+        return $re;
+    }
+
     /**
      * 设置视频信息
      */
@@ -201,12 +222,12 @@ class IndexAction extends Action
     {
         try {
             $code = $_POST['video_code'];
-            $name = $_POST['video_name'];
+            $name = trim($_POST['video_name']);
             if (!strlen($name)) {
                 throw new Exception('视频名称不能为空', 400);
             }
             self::checkFilenameVaild($name);
-            $video_cid = $_POST['video_cid'];
+            $video_cid = trim($_POST['video_cid']);
             $video_cids = explode(',', $video_cid);
             foreach ($video_cids as $k => $v) {
                 if (!is_numeric($k)) {
@@ -216,11 +237,11 @@ class IndexAction extends Action
             if (!$video_cids) {
                 throw new Exception('请选择视频栏目', 400);
             }
-            $introduction = $_POST['video_introduction'];
+            $introduction = trim($_POST['video_introduction']);
             if (mb_strlen($introduction, 'utf8') > $this->description_max_length) {
                 throw new Exception('视频简介的字数不能超过' . $this->description_max_length, 400);
             }
-            $uploader = $_POST['video_uploader'];
+            $uploader = trim($_POST['video_uploader']);
             if (!strlen($uploader)) {
                 throw new Exception('视频上传者名称不能为空', 400);
             }
@@ -230,7 +251,6 @@ class IndexAction extends Action
             }
             $folder_name = $name;
             $folder_path = $path . '/' . $folder_name;
-            $info_fullpath = $folder_path . '/info.xml';
             $ext = get_file_ext(basename($name));
             $filename = 'file' . ($ext ? '.' . $ext : '');
             $data = [
@@ -240,25 +260,8 @@ class IndexAction extends Action
                 'cid' => implode(',', $video_cids),
                 'filename' => $filename,
             ];
-            $string = "<?xml version='1.0' encoding='utf-8'?><video></video>";
-            $xml = simplexml_load_string($string);
-            foreach ($data as $k => $v) {
-                $xml->addChild($k, $v);
-            }
-            $content = $xml->asXML();
-
-            $server = $this->gk_client->getUploadServer($folder_path, 'team');
-            if (!$server) {
-                throw new Exception('获取上传服务器地址失败', 500);
-            }
-            $re = $this->gk_client->uploadByContent($content, $server, $info_fullpath, 'team');
-            if (!$re) {
-                throw new Exception('文件上传到够快失败', 500);
-            }
+            $re = self::uploadVideoInfo($this->gk_client, $folder_path, $data, $server);
             $folder_path = get_dir_path($re['fullpath']);
-            if ($re['error_code']) {
-                throw new Exception($re['error_msg'], $re['error_code']);
-            }
             if ($code) {
                 $result = $this->gk_client->save($code, '', $folder_path, 'team', $filename);
             } else {
