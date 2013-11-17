@@ -62,12 +62,10 @@ var gkHomeWorkDemo = {
         return true;
     },
     buildFileItem: function (file, tmpl) {
-        var _context = this;
         if (!file) {
             return '';
         }
         tmpl = tmpl === undefined ? $('#fileItemTmpl') : tmpl;
-        var selectNode = _context.zTreeObj.getSelectedNodes()[0];
         var meta = {
             file: file,
             access:PAGE_CONFIG.access || ''
@@ -75,7 +73,16 @@ var gkHomeWorkDemo = {
         return tmpl.tmpl(meta);
     },
     getFullpath: function () {
-        return Util.String.ltrim(PAGE_CONFIG.basePath ? PAGE_CONFIG.basePath + '/' + PAGE_CONFIG.path : PAGE_CONFIG.path,'/');
+        var basePath = Util.String.ltrim(PAGE_CONFIG.basePath, '/');
+        basePath = Util.String.rtrim(basePath, '/');
+        var path = Util.String.ltrim(PAGE_CONFIG.path, '/');
+        path = Util.String.rtrim(path, '/');
+        var fullpath = basePath;
+        if (fullpath.length) {
+            fullpath += '/';
+        }
+        fullpath += path;
+        return Util.String.rtrim(fullpath, '/');
     },
     checkFilenameValid: function (filename) {
         filename = $.trim(filename);
@@ -107,6 +114,23 @@ var gkHomeWorkDemo = {
             path: '/' + PAGE_CONFIG.userName
         };
         _context.fetchFileList(file);
+        _context.initShowUploadDialogBtn();
+        _context.initShowCategoryDialogBtn();
+        $('.main').on('click', '.cmd_show_upload_video', function(){
+            var modal = $('#uploadVideoModal').modal('show');
+            $('form', modal)[0].reset();
+            $('#video_categories', modal).val('');
+            $('#video_categories_name', modal).html('');
+            var col = $('#select_video_file').parents('.col-sm-10');
+            col.find('.alert').remove();
+            //显示允许上传的文件格式
+            if(PAGE_CONFIG.uploadAllowExt){
+                var uploadTip = '只允许上传 '+ PAGE_CONFIG.uploadAllowExt.split('|').join('、');
+                $('<div class="alert alert-info" />').text(uploadTip).appendTo(col);
+            }
+            col.find('>div').show();
+            col.find('ul').remove();
+        })
     },
     fetchFileList: function (node) {
         var _context = this;
@@ -138,21 +162,16 @@ var gkHomeWorkDemo = {
                 PAGE_CONFIG.access = data.access || '';
                 PAGE_CONFIG.uploadAllowExt =  data.uploadAllowExt;
             }
-
             var meta = {
                 breads: _context.getBreads(PAGE_CONFIG.path, [PAGE_CONFIG.userName]),
                 files: files,
                 current_node: node,
                 access: PAGE_CONFIG.access
             };
-
             var jqContent = $('#contentTmpl').tmpl(meta);
             $('.content').empty().append(jqContent);
             _context.initFileItem($('.file_list .file_item'));
-            _context.initShowUploadDialogBtn();
             _context.initCreateFolder();
-            _context.initShowCategoryDialogBtn();
-
         }, function () {
             $.loader.close();
         });
@@ -176,200 +195,157 @@ var gkHomeWorkDemo = {
     initShowUploadDialogBtn:function(){
         var _context = this;
         var modal = $('#uploadVideoModal');
-        modal.on('show.bs.modal',function(){
-            var col = $('#select_video_file').parents('.col-sm-10');
-            col.find('.alert').remove();
-            /**
-             * 显示允许上传的文件格式
-             */
-            if(PAGE_CONFIG.uploadAllowExt){
-                var uploadTip = '只允许上传 '+ PAGE_CONFIG.uploadAllowExt.split('|').join('、');
-                $('<div class="alert alert-info" />').text(uploadTip).appendTo(col);
-            }
-        });
-        /**
-         * modal显示后的回调
-         */
-        //modal.on('shown.bs.modal',function(){
-            var _self = modal;
-            var col = $('#select_video_file').parents('.col-sm-10');
-            var fullpath = PAGE_CONFIG.basePath ? PAGE_CONFIG.basePath + PAGE_CONFIG.path : PAGE_COFNIG.path;
-            var formData = {
-                path:fullpath
-            };
-
-            /**
-             * 上传本地文件
-             */
-            $('#select_video_file').fileupload({
-                url: '/index/upload_file',
-                dataType: 'json',
-                formData:formData,
-                add:function(e,data){
-                    if (!data) {
+        var col = $('#select_video_file').parents('.col-sm-10');
+        var fullpath = PAGE_CONFIG.basePath ? PAGE_CONFIG.basePath + PAGE_CONFIG.path : PAGE_COFNIG.path;
+        var formData = {
+            path:fullpath
+        };
+        //上传文件
+        $('#select_video_file').fileupload({
+            url: '/index/upload_file',
+            dataType: 'json',
+            formData:formData,
+            add:function(e,data){
+                if (!data) {
+                    return;
+                }
+                var files = data.files,file=files[0];
+                if(typeof file !=='undefined' && file.name){
+                    if(!_context.checkFileExt(file.name)){
                         return;
                     }
-                    var files = data.files,file=files[0];
-                    if(typeof file !=='undefined' && file.name){
-                        if(!_context.checkFileExt(file.name)){
-                            return;
-                        }
+                }
+                $('#video_rawname', modal).val(file.name);
+                var videoNameInput = modal.find('#video_name');
+                if(!$.trim(videoNameInput.val())){
+                    videoNameInput.val(file.name||'');
+                }
+                col.find(' > div').hide();
+                $('#uploadFileListTmpl').tmpl({files:files}).appendTo(col);
+                data.submit();
+            },
+            done: function (e, data) {
+                var result = data.result;
+                if(result){
+                    if(result['error_code']){
+                        $.alert(result['error_msg']);
+                        return;
                     }
+                    var tmpPath = result['tmp_path'];
+                    $('#video_tmp_path', modal).val(tmpPath);
+                    $('.ok', modal).removeProp('disabled');
+                }
+            },
+            progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                modal.find('.progress').show();
+                modal.find('.progress-bar').css(
+                    'width',
+                    progress + '%'
+                );
+            }
+        });
+        //从够快中选择
+        $('button.select_from_gokuai', modal).on('click', function(){
+            new GKC({
+                client_id:'818f83a6e217eb7152b28ba14fd31377',
+                mode:'chooser',
+                link_type:'download_link',
+                style:{
+                    'position':  'absolute',
+                    'top': '50%',
+                    'left': '50%',
+                    'right':'auto',
+                    'marginTop':'-200px',
+                    'marginLeft':'-192px',
+                    'height': '400px',
+                    'width': '385px',
+                    'borderRadius': '3px',
+                    'borderColor': '#3B74BA',
+                    'borderWidth': '3px',
+                    'borderStyle': 'solid',
+                    'backgroundColor': '#fff',
+                    'zIndex':'99999',
+                    'boxShadow':'0 0 20px 0 rgba(0,0,0,.3)'
+                },
+                ok:function(files){
+                    if(!files || !files.length){
+                        $.alert('请选择视频文件');
+                        return;
+                    }
+                    var file = files[0];
+                    var code = Util.String.getNextStr(file.link,'/'),
+                        filename = Util.String.baseName(file.fullpath);
+                    if(!_context.checkFileExt(filename)){
+                        return;
+                    }
+                    $('#video_code', modal).val(code);
+                    $('#video_rawname', modal).val(filename);
                     var videoNameInput = modal.find('#video_name');
                     if(!$.trim(videoNameInput.val())){
-                        videoNameInput.val(file.name||'');
+                        videoNameInput.val(filename);
                     }
                     col.find(' > div').hide();
-                    $('#uploadFileListTmpl').tmpl({files:files}).appendTo(col);
-                    data.submit();
+                    var meta = [{
+                        name:filename
+                    }];
+                    $('#uploadFileListTmpl').tmpl({files:meta}).appendTo(col).show();
+                    $('.ok', modal).removeProp('disabled');
                 },
-                done: function (e, data) {
-                    var result = data.result;
-                    if(result){
-                        if(result['error_code']){
-                            $.alert(result['error_msg']);
-                            return;
-                        }
-                        var tmpPath = result['tmp_path'];
-                        _self.find('#video_tmp_path').val(tmpPath);
-                        _self.find('.ok').removeProp('disabled');
-                    }
-                },
+                cancel:function(){
 
-                progressall: function (e, data) {
-                    var progress = parseInt(data.loaded / data.total * 100, 10);
-                    modal.find('.progress').show();
-                    modal.find('.progress-bar').css(
-                        'width',
-                        progress + '%'
-                    );
                 }
             });
-
-            /**
-             * 从够快中选择
-             */
-            _self.find('button.select_from_gokuai').off('click').click(function(){
-                new GKC({
-                    client_id:'818f83a6e217eb7152b28ba14fd31377',
-                    mode:'chooser',
-                    link_type:'download_link',
-                    style:{
-                        'position':  'absolute',
-                        'top': '50%',
-                        'left': '50%',
-                        'right':'auto',
-                        'marginTop':'-200px',
-                        'marginLeft':'-192px',
-                        'height': '400px',
-                        'width': '385px',
-                        'borderRadius': '3px',
-                        'borderColor': '#3B74BA',
-                        'borderWidth': '3px',
-                        'borderStyle': 'solid',
-                        'backgroundColor': '#fff',
-                        'zIndex':'99999',
-                        'boxShadow':'0 0 20px 0 rgba(0,0,0,.3)'
-                    },
-                    ok:function(files){
-                        if(!files || !files.length){
-                            $.alert('请选择视频文件');
-                            return;
-                        }
-                        var file = files[0];
-                        var code = Util.String.getNextStr(file.link,'/'),
-                            filename = Util.String.baseName(file.fullpath);
-                        if(!_context.checkFileExt(filename)){
-                            return;
-                        }
-                        _self.find('#video_code').val(code);
-                        var videoNameInput = modal.find('#video_name');
-                        if(!$.trim(videoNameInput.val())){
-                            videoNameInput.val(filename);
-                        }
-                        var col = $('#select_video_file').parents('.col-sm-10');
-                        col.find(' > div').hide();
-                        var meta = [{
-                            name:filename
-                        }];
-                        $('#uploadFileListTmpl').tmpl({files:meta}).appendTo(col).show();
-                        _self.find('.ok').removeProp('disabled');
-                    },
-                    cancel:function(){
-
-                    }
-                });
-                return false;
-            });
-
-
-            //提交视频信息
-            _self.find('.ok').off('click').click(function(){
-                var videoName = $.trim(_self.find('#video_name').val());
-                if(!videoName.length){
-                    $.alert('请输入视频名称');
-                    return;
-                }
-                if(!_context.checkFilenameVaild(videoName)){
-                    return;
-                }
-                var videoCid = _self.find('#video_categories').val();
-                if (!videoCid.length) {
-                    $.alert('请选择视频栏目');
-                    return;
-                }
-                var videoTmpPath = $.trim(_self.find('#video_tmp_path').val());
-                var videoIntroduction = $.trim(_self.find('#video_introduction').val());
-                var videoUploader = $.trim(_self.find('#video_uploader').val());
-                if(!videoUploader.length){
-                    $.alert('请输出上传者名称');
-                    return;
-                }
-                var videoCode = _self.find('#video_code').val();
-                var params = {
-                  video_name:videoName,
-                  video_cid:videoCid,
-                  video_tmp_path:videoTmpPath,
-                  video_introduction:videoIntroduction,
-                  video_uploader:videoUploader,
-                  video_code:videoCode,
-                  path:_context.getFullpath()
-                };
-                _self.find('.modal-content').loader();
-                $.ajax({
-                    url:'/index/set_video_info',
-                    type:'POST',
-                    data:params,
-                    dataType:'json',
-                    success:function(data){
-                        $.loader.close();
-                        var fullpath = gkHomeWorkDemo.getFullpath();
-                        _gkDemoAfterUpload(fullpath);
-                        _self.modal('hide');
-                    },
-                    error:function(request){
-                        $.loader.close();
-                        var errorMsg = _context.getErrorMsg(request);
-                        $.alert(errorMsg);
-
-                    }
-                });
-            });
-        //})
-        /**
-         * modal隐藏后的回调
-         */
-        modal.on('hidden.bs.modal',function(){
-            var _self = $(this);
-            var col = _self.find('#select_video_file').parents('.col-sm-10');
-            col.find('.alert').remove();
-            col.find('>div').show();
-            col.find('ul').remove();
-            _self.find('form')[0].reset();
-            $('#video_categories').val('');
-            $('#video_categories_name').html('');
+            return false;
         });
+        //提交视频信息
+        $('.ok', modal).on('click', function(){
+            var videoName = $.trim($('#video_name', modal).val());
+            if(!videoName.length){
+                $.alert('请填写视频名称');
+                return;
+            }
+            if(!_context.checkFilenameVaild(videoName)){
+                return;
+            }
+            var videoCid = $('#video_categories', modal).val();
+            if (!videoCid.length) {
+                $.alert('请选择视频栏目');
+                return;
+            }
+            var videoTmpPath = $.trim($('#video_tmp_path', modal).val());
+            var videoIntroduction = $.trim($('#video_introduction', modal).val());
+            var videoRawname = $.trim($('#video_rawname', modal).val());
+            var videoCode = $('#video_code', modal).val();
+            var params = {
+              video_name:videoName,
+              video_rawname:videoRawname,
+              video_cid:videoCid,
+              video_tmp_path:videoTmpPath,
+              video_introduction:videoIntroduction,
+              video_code:videoCode,
+              path:_context.getFullpath()
+            };
+            modal.loader();
+            $.ajax({
+                url:'/index/set_video_info',
+                type:'POST',
+                data:params,
+                dataType:'json',
+                success:function(){
+                    $.loader.close();
+                    var fullpath = gkHomeWorkDemo.getFullpath();
+                    _gkDemoAfterUpload(fullpath);
+                    modal.modal('hide');
+                },
+                error:function(request){
+                    $.loader.close();
+                    var errorMsg = _context.getErrorMsg(request);
+                    $.alert(errorMsg);
 
+                }
+            });
+        });
     },
     initShowCategoryDialogBtn:function(){
         var modal = $('#categoryModal');
@@ -481,7 +457,7 @@ var gkHomeWorkDemo = {
 //                jqBtns.find('button:first').trigger('click');
 //            });
             jqInput[0].select();
-            $('.file_list').scrollTop(0);
+            jqList.scrollTop(0);
         });
     },
     getBreads: function (path, showNames) {
@@ -504,13 +480,18 @@ var gkHomeWorkDemo = {
     },
     initFileItem: function (items) {
         var _context = this;
-        items.click(function () {
+        items.on('dblclick', function () {
             var metaData = $(this).data();
-             var dir = metaData.dir;
+            var dir = metaData.dir;
             if(dir ==1){
                 metaData.path = PAGE_CONFIG.path + '/' + metaData.filename;
                 _context.fetchFileList(metaData);
             }
+        });
+        $('.folder_name', items).on('click', function () {
+            var metaData = $(this).parents('.file_item').data();
+            metaData.path = PAGE_CONFIG.path + '/' + metaData.filename;
+            _context.fetchFileList(metaData);
         });
     },
     getFileList: function (path, success, error) {
@@ -524,7 +505,7 @@ var gkHomeWorkDemo = {
             success: function (data) {
                 $.isFunction(success) && success(data);
             },
-            error: function (data) {
+            error: function () {
                 $.isFunction(error) && success(error);
             }
         })
@@ -588,7 +569,6 @@ var gkHomeWorkDemo = {
                 var params = $.param(opts.params);
                 var url = opts.url + '?' + params;
                 $.fn.gkUpload.open(url, opts.width, opts.height, opts.name);
-                return;
             });
         });
     };
@@ -681,15 +661,13 @@ var gkHomeWorkDemo = {
                         fileData.name = name_pre + '_' + file.id + '.' + ext;
                         file.gkFilename = fileData.name;
                     }
-                    var fileProgress = new FileProgress(fileData, target);
-                    data.context = fileProgress;
+                    data.context = new FileProgress(fileData, target);
                 });
                 data.submit();
-                return;
             },
             submit: function (e, data) {
                 if (!data || !data.files) {
-                    return;
+                    return false;
                 }
 
                 data.formData = opts.uploadParams;
@@ -719,6 +697,7 @@ var gkHomeWorkDemo = {
                     }
                 }
                 progress.toggleCancel(true, data.jqXHR);
+                return true;
             },
             done: function (e, data) {
                 var result = data.result, arr = [];
@@ -736,7 +715,6 @@ var gkHomeWorkDemo = {
                     var errorMsg = arr[1];
                     if (errorMsg) {
                         progress.setErrorMsg(errorMsg);
-                        return;
                     }
                 } else {
                     progress.setSuccess();
@@ -755,7 +733,7 @@ var gkHomeWorkDemo = {
                 progress.setLeaveSize(bytesLoaded, bytesTotal);
             },
 
-            stop: function (e, data) {
+            stop: function () {
                 var win = window.opener;
                 win && win[opts.stopCallback] && win[opts.stopCallback](opts.uploadParams.path);
                 var isClose = $('input[name="close_when_finish"]:checked').size();
@@ -770,12 +748,11 @@ var gkHomeWorkDemo = {
                     window.close();
                 }
             },
-
-            drop: function (e, data) {
+            drop: function () {
                 $('body .ui-widget-overlay').hide();
                 $('body #drop_zone').hide();
             },
-            dragover: function (e, data) {
+            dragover: function () {
                 var mask = $('.ui-widget-overlay');
                 var dropZone = $('#drop_zone');
                 mask.show();

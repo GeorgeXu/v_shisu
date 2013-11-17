@@ -15,8 +15,8 @@ class AccountAction extends Action
      */
     public static function get_member()
     {
-        return ['id' => 40300032, 'name' => 'ITC部门邮箱', 'email' => 'wink@gokuai.com'];
-//        return $_SESSION['member'];
+//        return ['id' => 40300032, 'name' => 'ITC部门邮箱', 'email' => 'wink@gokuai.com'];
+        return $_SESSION['member'];
     }
 
     public static function dispatch($logined, $returnurl = '')

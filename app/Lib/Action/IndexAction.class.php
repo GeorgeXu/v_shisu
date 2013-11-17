@@ -57,32 +57,49 @@ class IndexAction extends Action
         }
     }
 
+    private function getUserFolderName()
+    {
+        return $this->member['id'] . '-' . $this->member['name'];
+    }
+
+    private function analyzeXml()
+    {
+        $xml = $this->gk_widget->getXmlDom();
+        $page_name = $xml['name'] ? (string)$xml['name'] : '未命名';
+        $background_color = (string)$xml['background_color'];
+        $logo_url = (string)$xml['logo_url'];
+        $base_name = '';
+        $base_path = '';
+        foreach ($xml->nodes as $node) {
+            $base_name = (string)$node->attributes()['name'];
+            $base_path = (string)$node->attributes()['base_path'];
+        }
+        if (!strlen($base_path)) {
+            throw new Exception('video.xml中未定义base_path', 400);
+        }
+        return [
+            'page_name' => $page_name,
+            'background_color' => $background_color,
+            'logo_url' => $logo_url,
+            'base_name' => $base_name,
+            'base_path' => $base_path
+        ];
+    }
+
     /**
      * 主页
      */
     public function index()
     {
         try {
-            $xml = $this->gk_widget->getXmlDom();
-            $page_name = $xml['name'] ? (string)$xml['name'] : '未命名';
-            $background_color = (string)$xml['background_color'];
-            $logo_url = (string)$xml['logo_url'];
-            $base_name = '';
-            $base_path = '';
-            foreach ($xml->nodes as $node) {
-                $base_name = (string)$node->attributes()['name'];
-                $base_path = (string)$node->attributes()['base_path'];
-            }
-            if (!strlen($base_path)) {
-                throw new Exception('video.xml中未定义base_path', 400);
-            }
-            $user_name = $this->member['id'] . '-' . $this->member['name'];
-            $this->assign('page_name', $page_name);
-            $this->assign('background_color', $background_color);
-            $this->assign('logo_url', $logo_url);
+            $data = $this->analyzeXml();
+            $user_name = self::getUserFolderName();
+            $this->assign('page_name', $data['page_name']);
+            $this->assign('background_color', $data['background_color']);
+            $this->assign('logo_url', $data['logo_url']);
             $this->assign('user_name', $user_name);
-            $this->assign('base_name', $base_name);
-            $this->assign('base_path', $base_path);
+            $this->assign('base_name', $data['base_name']);
+            $this->assign('base_path', $data['base_path']);
             $this->display();
         } catch (Exception $e) {
             ErrorAction::show_page($e->getMessage(), $e->getCode());
@@ -241,17 +258,16 @@ class IndexAction extends Action
             if (mb_strlen($introduction, 'utf8') > $this->description_max_length) {
                 throw new Exception('视频简介的字数不能超过' . $this->description_max_length, 400);
             }
-            $uploader = trim($_POST['video_uploader']);
-            if (!strlen($uploader)) {
-                throw new Exception('视频上传者名称不能为空', 400);
-            }
-            $path = $_POST['path'];
+            $path = trim($_POST['path'], ' \\/');
             if (!strlen($path)) {
                 throw new Exception('缺少参数[path]', 400);
             }
+            GKWidgetXML::checkPath($path);
+            $uploader = $this->member['name'];
+            $rawname = trim($_POST['video_rawname']);
             $folder_name = $name;
             $folder_path = $path . '/' . $folder_name;
-            $ext = get_file_ext(basename($name));
+            $ext = get_file_ext(basename($rawname));
             $filename = 'file' . ($ext ? '.' . $ext : '');
             $data = [
                 'name' => $name,
@@ -264,6 +280,9 @@ class IndexAction extends Action
             $folder_path = get_dir_path($re['fullpath']);
             if ($code) {
                 $result = $this->gk_client->save($code, '', $folder_path, 'team', $filename);
+                if (!$result) {
+                    throw new Exception('保存失败', 500);
+                }
             } else {
                 $tmp_filename = $_POST['video_tmp_path'];
                 $tmp_path = self::getTempUploadPath() . DIRECTORY_SEPARATOR . $tmp_filename;
