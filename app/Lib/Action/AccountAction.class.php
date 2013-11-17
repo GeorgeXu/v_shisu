@@ -171,7 +171,7 @@ class AccountAction extends Action
                     'name' => $_POST['name'],
                     'uploader' => $_POST['uploader'],
                     'introduction' => $_POST['introduction'],
-                    'cid' => implode(',', $_POST['cid']),
+                    'cid' => $_POST['cid'],
                     'filename' => $_POST['filename'],
                 ];
                 IndexAction::uploadVideoInfo($gk_client, dirname($info_path), $data, $server);
