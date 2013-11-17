@@ -355,9 +355,7 @@ var gkHomeWorkDemo = {
                     }
                 });
             });
-
         //})
-
         /**
          * modal隐藏后的回调
          */
@@ -381,6 +379,7 @@ var gkHomeWorkDemo = {
             async:{enable:true,type:'get','url':'/account/categories'}
         }, []);
         modal.on('show.bs.modal',function(){
+            $('#uploadVideoModal').modal('hide');
             var selected_cids = $('#video_categories').val().split(',');
             $.each(selected_cids, function(i,n){
                 var node = PAGE_CONFIG.tree.getNodeByParam('id', n);
@@ -390,8 +389,9 @@ var gkHomeWorkDemo = {
             });
         }).on('hidden.bs.modal',function(){
             PAGE_CONFIG.tree.checkAllNodes(false);
+            $('#uploadVideoModal').modal('show');
         });
-        modal.find('.ok').off('click').click(function(){
+        $('.ok', modal).on('click', function(){
             var nodes = PAGE_CONFIG.tree.getCheckedNodes();
             var cids_input = $('#video_categories').val('');
             var cids_span = $('#video_categories_name').html('');
