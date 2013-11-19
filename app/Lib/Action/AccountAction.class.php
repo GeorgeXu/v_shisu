@@ -173,6 +173,7 @@ class AccountAction extends Action
                     'introduction' => $_POST['introduction'],
                     'cid' => $_POST['cid'],
                     'filename' => $_POST['filename'],
+                    'recommend' => $_POST['recommend'] ? $_POST['recommend'] : 0
                 ];
                 IndexAction::uploadVideoInfo($gk_client, dirname($info_path), $data, $server);
             } else {
@@ -189,7 +190,8 @@ class AccountAction extends Action
                     'uploader' => (string)$xml->uploader,
                     'introduction' => (string)$xml->introduction,
                     'cid' => (string)$xml->cid,
-                    'filename' => (string)$xml->filename
+                    'filename' => (string)$xml->filename,
+                    'recommend' => ((string)$xml->recommend) ? 1 : 0
                 ];
                 echo json_encode($data);
             }
