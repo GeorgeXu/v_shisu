@@ -275,6 +275,7 @@ class IndexAction extends Action
                 'introduction' => $introduction,
                 'cid' => implode(',', $video_cids),
                 'filename' => $filename,
+                'recommend' => 0
             ];
             $re = self::uploadVideoInfo($this->gk_client, $folder_path, $data, $server);
             $folder_path = get_dir_path($re['fullpath']);
