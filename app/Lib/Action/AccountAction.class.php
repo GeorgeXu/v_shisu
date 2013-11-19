@@ -115,7 +115,7 @@ class AccountAction extends Action
         $result = [
             'id' => $id,
             'name' => $name,
-            'open' => true,
+            'open' => false,
             'children' => []
         ];
         if ($nocheck) {
