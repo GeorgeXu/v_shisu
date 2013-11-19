@@ -1,26 +1,127 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <categories>
-    <category id="8" name="外语资料" nocheck="1">
-        <category id="1" name="英语">
-            <category id="15" name="新闻英语" />
-            <category id="16" name="新闻英语" />
+    <category id="1" name="首页"/>
+    <category id="8" name="外语资料">
+        <category id="14" name="英语">
+            <category id="15" name="新闻英语"/>
+            <category id="16" name="英语学习"/>
+            <category id="17" name="纪录片"/>
+            <category id="18" name="演讲集"/>
+            <category id="19" name="脱口秀"/>
+            <category id="20" name="电视剧"/>
+            <category id="21" name="电影"/>
+            <category id="121" name="2012美国大选"/>
         </category>
+        <category id="22" name="俄语">
+            <category id="86" name="俄语新闻"/>
+            <category id="87" name="俄语动画片"/>
+            <category id="88" name="俄语电影"/>
+            <category id="89" name="俄语电视剧"/>
+            <category id="90" name="俄语纪录片"/>
+            <category id="91" name="俄语教学"/>
+            <category id="92" name="俄语演讲"/>
+            <category id="93" name="俄语电视节目"/>
+            <category id="134" name="专题：海军上将高尔察克"/>
+        </category>
+        <category id="23" name="德语">
+            <category id="24" name="新闻"/>
+            <category id="25" name="教学片"/>
+            <category id="26" name="纪录片"/>
+            <category id="27" name="电视节目"/>
+            <category id="28" name="体育"/>
+            <category id="29" name="电影"/>
+            <category id="129" name="German Angst"/>
+        </category>
+        <category id="30" name="西班牙语">
+            <category id="52" name="教学片"/>
+            <category id="53" name="专题节目"/>
+            <category id="54" name="风光片"/>
+            <category id="55" name="电影"/>
+            <category id="76" name="新闻"/>
+        </category>
+        <category id="31" name="葡萄牙语">
+            <category id="49" name="葡语新闻"/>
+            <category id="50" name="葡语电影"/>
+            <category id="51" name="葡语教学"/>
+            <category id="114" name="真人秀节目"/>
+            <category id="115" name="葡语纪录片"/>
+            <category id="118" name="巴西世界杯专栏"/>
+        </category>
+        <category id="32" name="法语">
+            <category id="46" name="法语教学"/>
+            <category id="48" name="法语新闻"/>
+            <category id="110" name="法语纪录片"/>
+            <category id="116" name="法语电视剧"/>
+            <category id="117" name="法语电影"/>
+            <category id="122" name="法语脱口秀"/>
+            <category id="133" name="名师推荐-地理历史"/>
+        </category>
+        <category id="33" name="日语">
+            <category id="43" name="日语新闻"/>
+            <category id="44" name="日语影视"/>
+            <category id="45" name="标准日本语视频"/>
+            <category id="85" name="日语纪录片"/>
+            <category id="119" name="日语教程"/>
+        </category>
+        <category id="34" name="韩语">
+            <category id="40" name="新闻"/>
+            <category id="41" name="韩语学习教程"/>
+            <category id="42" name="影视"/>
+            <category id="130" name="纪录片"/>
+            <category id="131" name="韩国文化"/>
+            <category id="132" name="韩国历史"/>
+        </category>
+        <category id="35" name="阿拉伯语">
+            <category id="37" name="阿语教学"/>
+            <category id="38" name="阿语动画片"/>
+            <category id="39" name="阿语影视"/>
+            <category id="75" name="阿语新闻"/>
+            <category id="113" name="阿语纪录片"/>
+        </category>
+        <category id="36" name="印尼语">
+            <category id="102" name="新闻"/>
+            <category id="103" name="影视"/>
+            <category id="104" name="纪录片"/>
+            <category id="105" name="访谈"/>
+        </category>
+        <category id="80" name="土耳其语">
+            <category id="106" name="影视"/>
+            <category id="107" name="新闻与纪实"/>
+            <category id="108" name="土耳其语教学"/>
+            <category id="109" name="纪录片"/>
+        </category>
+        <category id="81" name="泰语">
+            <category id="99" name="泰国新闻"/>
+            <category id="100" name="影视音像"/>
+            <category id="120" name="文化纪录"/>
+            <category id="127" name="泰语教学"/>
+        </category>
+        <category id="124" name="希伯来语"/>
     </category>
     <category id="6" name="西索光影">
         <category id="63" name="视频新闻">
+            <category id="66" name="一周新闻"/>
+            <category id="68" name="活动预告"/>
+            <category id="67" name="专题新闻"/>
         </category>
         <category id="64" name="魅力上外">
+            <category id="69" name="西索文景"/>
+            <category id="70" name="西索生活"/>
+            <category id="71" name="上外印象"/>
         </category>
         <category id="65" name="专题视频">
+            <category id="72" name="学术专题"/>
+            <category id="73" name="教学专题"/>
+            <category id="74" name="人文专题"/>
         </category>
     </category>
     <category id="7" name="缤纷校园">
     </category>
     <category id="8" name="热门讲座">
-        <category id="123" name="MBA教育中心" />
+        <category id="123" name="MBA教育中心"/>
     </category>
-    <category id="11" name="党建在线" nocheck="1">
-        <category id="61" name="党建专题讲座"  />
-        <category id="84" name="党建教育影片" />
+    <category id="11" name="党建在线">
+        <category id="61" name="党建专题讲座"/>
+        <category id="84" name="党建教育影片"/>
     </category>
 </categories>
