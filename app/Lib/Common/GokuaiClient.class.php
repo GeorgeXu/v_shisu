@@ -49,6 +49,24 @@ class GokuaiClient {
         }
     }
 
+    public function exchangeToken($token, $domain) {
+        $url = self::API_URL . '/oauth2/token';
+        $parameters = array('client_id' => $this->client_id,
+                            'client_secret' => $this->client_secret,
+                            'grant_type' => 'exchange_token',
+                            'exchange_token' => $token,
+                            'exchange_domain' => $domain);
+        $this->response = self::http($url, 'POST', $parameters, array(), $this->http_code, $this->error);
+        echo $this->response;
+        $json = $this->handleResponse();
+        if ($json['access_token']) {
+            $this->token = $json['access_token'];
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * 获取文件列表
      * @param string $fullpath 获取哪个路径下的文件列表
@@ -140,6 +158,7 @@ class GokuaiClient {
      * @param string $path 外链中的文件相对路径
      * @param string $to_fullpath 保存目标目录
      * @param string $to_mount
+     * @param string $filename
      * @return bool|array
      */
     public function save($code, $path = '', $to_fullpath = '', $to_mount = 'gokuai', $filename = '') {
