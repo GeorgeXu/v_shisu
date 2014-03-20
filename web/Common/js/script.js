@@ -9,6 +9,7 @@ var gkHomeWorkDemo = {
         'SORT_ZIP': ['rar', 'zip', '7z', 'cab', 'tar', 'gz', 'iso'],
         'SORT_EXE': ['exe', 'bat', 'com']
     },
+    fileSizeLimit: 1073741824, //1GB
     zTreeObj: null,
     getErrorMsg:function(request){
         var errorMsg = '';
@@ -547,7 +548,7 @@ var gkHomeWorkDemo = {
         uploadBtn.gkUpload({
             url: '/index/upload',
             params: {
-                fileSizeLimit: 300 * 1024 * 1024,
+                fileSizeLimit: gkHomeWorkDemo.fileSizeLimit,
                 stopCallback: "_gkDemoAfterUpload",
                 uploadParams: encodeURIComponent(JSON.stringify({
                     path: fulllpath,
@@ -586,14 +587,14 @@ var gkHomeWorkDemo = {
         name: 'gk_upload_window',
         url: '/index/upload',
         params: {
-            fileSizeLimit: 300 * 1024 * 1024,
+            fileSizeLimit: gkHomeWorkDemo.fileSizeLimit,
             uploadParams: ''
         }
     };
 
     $.fn.gkUpload.init = function (options) {
         var defaults = {
-            fileSizeLimit: 300 * 1024 * 1024,
+            fileSizeLimit: gkHomeWorkDemo.fileSizeLimit,
             uploadURL: '',
             stopCallback: '',
             redirectURL: '',
