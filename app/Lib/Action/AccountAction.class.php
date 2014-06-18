@@ -173,7 +173,8 @@ class AccountAction extends Action
                     'introduction' => $_POST['introduction'],
                     'cid' => $_POST['cid'],
                     'filename' => $_POST['filename'],
-                    'recommend' => $_POST['recommend'] ? $_POST['recommend'] : 0
+                    'recommend' => $_POST['recommend'] ? $_POST['recommend'] : 0,
+                    'rawname' => strlen($_POST['rawname']) ? $_POST['rawname'] : ''
                 ];
                 IndexAction::uploadVideoInfo($gk_client, dirname($info_path), $data, $server);
             } else {
@@ -193,6 +194,8 @@ class AccountAction extends Action
                     'filename' => (string)$xml->filename,
                     'recommend' => ((string)$xml->recommend) ? 1 : 0
                 ];
+                $rawname = (string)$xml->rawname;
+                $data['rawname'] = strlen($rawname) ? $rawname : '';
                 echo json_encode($data);
             }
         } catch (Exception $e) {

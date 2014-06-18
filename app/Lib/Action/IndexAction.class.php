@@ -267,15 +267,15 @@ class IndexAction extends Action
             $rawname = trim($_POST['video_rawname']);
             $folder_name = $name;
             $folder_path = $path . '/' . $folder_name;
-            $ext = get_file_ext(basename($rawname));
-            $filename = 'file' . ($ext ? '.' . $ext : '');
+            $filename = 'file';
             $data = [
                 'name' => $name,
                 'uploader' => $uploader,
                 'introduction' => $introduction,
                 'cid' => implode(',', $video_cids),
                 'filename' => $filename,
-                'recommend' => 0
+                'recommend' => 0,
+                'rawname' => $rawname
             ];
             $re = self::uploadVideoInfo($this->gk_client, $folder_path, $data, $server);
             $folder_path = get_dir_path($re['fullpath']);
