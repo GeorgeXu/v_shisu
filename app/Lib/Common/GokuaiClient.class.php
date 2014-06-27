@@ -287,7 +287,7 @@ class GokuaiClient {
         try {
             $postfields = array_map_assert($options, 'postfields', false);
             $connect_timeout = array_map_assert($options, 'connect_timeout', 10);
-            $timeout = array_map_assert($options, 'timeout', 120);
+            $timeout = array_map_assert($options, 'timeout', 7200);
             $ch = curl_init($url);
             if (stripos($url, "https://") !== false) {
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
