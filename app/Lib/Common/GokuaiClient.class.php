@@ -341,6 +341,13 @@ class GokuaiClient {
             $response = curl_exec($ch);
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $error = curl_error($ch);
+            if ($http_code != 200) {
+                if ($error) {
+                    Log::write($error . ': ' . $url, Log::ERR);
+                } else {
+                    Log::write($http_code . ': ' . $url . ', ' . $response, Log::ERR);
+                }
+            }
             curl_close($ch);
             return $response;
         } catch (Exception $e) {

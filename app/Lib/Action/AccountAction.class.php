@@ -182,7 +182,11 @@ class AccountAction extends Action
                 if (!$info['uri']) {
                     throw new Exception('无法获取info.xml的下载地址', 404);
                 }
-                $xml = simplexml_load_file($info['uri']);
+                $response = curl_invoke($info['uri'], 'GET', null, null, $http_code);
+                if ($http_code != 200 || !$response) {
+                    throw new Exception('无法下载info.xml', 500);
+                }
+                $xml = simplexml_load_string($response);
                 if (!$xml) {
                     throw new Exception('无法解析info.xml', 400);
                 }
